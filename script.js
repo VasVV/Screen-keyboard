@@ -1,34 +1,28 @@
-const Keyboard = {
-  elems: {
-    main: null,
-    keysContainer: null,
-    keys: [],
-  },
-  eventHandlers: {
-    oninput: null,
-    onclose: null,
-    isClosed: false,
-  },
-  properties: {
-    capslock: false,
-    value: [],
-  },
+class Keyboard {
+  constructor() {
+    this.main = null;
+    this.keysContainer = null;
+    this.keys = [];
+    this.oninput = null;
+    this.onclose = null;
+    this.isClosed = false;
+    this.capslock = false;
+    this.value = [];
+  }
   init() {
-    this.elems.main = document.createElement("div");
-    this.elems.keysContainer = document.createElement("div");
-    this.elems.main.classList.add("keyboard");
-    this.elems.keysContainer.classList.add("keyboard-keys");
-    this.elems.keysContainer.appendChild(this.createKeys());
+    this.main = document.createElement("div");
+    this.keysContainer = document.createElement("div");
+    this.main.classList.add("keyboard");
+    this.keysContainer.classList.add("keyboard-keys");
+    this.keysContainer.appendChild(this.createKeys());
 
-    this.elems.keys = this.elems.keysContainer.querySelectorAll(
+    this.keys = this.keysContainer.querySelectorAll(
       ".keyboard-key"
     );
-    this.elems.main.appendChild(this.elems.keysContainer);
+    this.main.appendChild(this.keysContainer);
 
-    console.log(this.elems.keysContainer);
-
-    document.body.appendChild(this.elems.main);
-  },
+    document.body.appendChild(this.main);
+  };
   createKeys() {
     let fragment = document.createDocumentFragment();
 
@@ -82,20 +76,22 @@ const Keyboard = {
 
     keyboard.forEach((e) => {
       let keyEl = document.createElement("button");
-      //console.log(keyEl);
       let isBreak;
-      if (e == "backspace") {
-        isBreak = true;
+      switch (e) {
+        case 'backspace':
+          isBreak = true;
+          break;
+        case 'p':
+          isBreak = true;
+          break;
+        case 'enter':
+          isBreak = true;
+          break;
+        case 'm':
+          isBreak = true;
+          break;
       }
-      if (e == "p") {
-        isBreak = true;
-      }
-      if (e == "enter") {
-        isBreak = true;
-      }
-      if (e == "m") {
-        isBreak = true;
-      }
+      
       keyEl.setAttribute("type", "button");
       keyEl.classList.add("keyboard-key");
 
@@ -103,10 +99,10 @@ const Keyboard = {
         keyEl.classList.add("keyboard-key--wide");
         keyEl.innerHTML = createIcon("backspace");
         keyEl.addEventListener("click", () => {
-          this.properties.value.pop();
+          this.value.pop();
           document.getElementById(
             "text"
-          ).textContent = this.properties.value.join("");
+          ).textContent = this.value.join("");
           this.trigger("input");
         });
       } else if (e == "capslock") {
@@ -118,7 +114,7 @@ const Keyboard = {
         keyEl.innerHTML = "caps";
         keyEl.addEventListener("click", () => {
           this.capslock();
-          this.properties.capslock
+          this.capslock
             ? keyEl.classList.add("keyboard-key--active")
             : keyEl.classList.remove("keyboard-key--active");
         });
@@ -126,21 +122,21 @@ const Keyboard = {
         keyEl.classList.add("keyboard-key--wide");
         keyEl.innerHTML = createIcon("keyboard_return");
         keyEl.addEventListener("click", () => {
-          this.properties.value.push("\n");
+          this.value.push("\n");
           document.getElementById(
             "text"
-          ).textContent = this.properties.value.join("");
+          ).textContent = this.value.join("");
           this.trigger("input");
         });
       } else if (e == "space") {
         keyEl.classList.add("keyboard-key--extra-wide");
         keyEl.innerHTML = createIcon("keyboard");
         keyEl.addEventListener("click", () => {
-          this.properties.value.push(" ");
+          this.value.push(" ");
           this.trigger("input");
           document.getElementById(
             "text"
-          ).textContent = this.properties.value.join("");
+          ).textContent = this.value.join("");
         });
       } else if (e == "done") {
         keyEl.classList.add("keyboard-key--wide", "keyboard-key--dark");
@@ -157,23 +153,22 @@ const Keyboard = {
 
         keyEl.addEventListener("click", () => {
           if (/[0-9]/.test(e)) {
-            this.properties.value.push(e);
+            this.value.push(e);
             document.getElementById(
               "text"
-            ).textContent = this.properties.value.join("");
+            ).textContent = this.value.join("");
           } else {
-            console.log(this.properties.value);
-            this.properties.capslock
-              ? this.properties.value.push(e.toUpperCase())
-              : this.properties.value.push(e.toLowerCase());
+            this.capslock
+              ? this.value.push(e.toUpperCase())
+              : this.value.push(e.toLowerCase());
             document.getElementById(
               "text"
-            ).textContent = this.properties.value.join("");
+            ).textContent = this.value.join("");
             this.trigger(e);
           }
         });
       }
-      //console.log(keyEl);
+
       fragment.appendChild(keyEl);
       if (isBreak) {
         let br = document.createElement("br");
@@ -182,47 +177,49 @@ const Keyboard = {
     });
 
     return fragment;
-  },
+  };
   trigger(handler) {
     console.log(handler);
-    if (typeof this.eventHandlers[handler] == "function") {
-      this.eventHandlers[handler](this.properties.value);
+    if (typeof this[handler] == "function") {
+      this[handler](this.value);
     }
-  },
+  };
 
   capslock() {
-    this.properties.capslock = !this.properties.capslock;
-    //console.log(this.properties.capslock);
-    for (let key of this.elems.keys) {
+    this.capslock = !this.capslock;
+    for (let key of this.keys) {
       if (key.childElementCount == 0) {
-        key.textContent = this.properties.capslock
+        key.textContent = this.capslock
           ? key.textContent.toUpperCase()
           : key.textContent.toLowerCase();
       }
     }
-    console.log(this.properties.value);
-  },
+    
+  };
   openclose(initval, open, close) {
     let init = initval.split("");
-    this.properties.value = this.properties.value.concat(init) || "";
-  },
+    this.value = this.value.concat(init) || "";
+  };
   close() {
-    this.elems.main.classList.add("keyboard--hidden");
-    this.eventHandlers.isClosed = true;
-  },
+    this.main.classList.add("keyboard--hidden");
+    this.isClosed = true;
+  };
 };
 
+let keyboard = new Keyboard();
+
 window.addEventListener("DOMContentLoaded", () => {
-  Keyboard.init();
+  keyboard.init();
 });
 
-document.getElementById("text").addEventListener("click", () => {
-  console.log(Keyboard.eventHandlers.isClosed);
-  if (Keyboard.eventHandlers.isClosed) {
-    console.log(Keyboard.eventHandlers.isClosed);
-    Keyboard.init();
-    Keyboard.eventHandlers.isClosed = false;
+window.addEventListener("DOMContentLoaded", () => {
+document.getElementById('text').addEventListener("click", () => {
+  if (keyboard.eventHandlers.isClosed) {
+    
+    keyboard.init();
+    keyboard.eventHandlers.isClosed = false;
   } else {
     console.log("not closed");
   }
+});
 });
